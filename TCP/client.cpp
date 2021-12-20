@@ -1,34 +1,58 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<sys/stat.h>
-#include<sys/socket.h>
-#include<sys/types.h>
-#include<sys/un.h>
-#include<errno.h>
-#include<stddef.h>
-#include<unistd.h>
-#define BUFFER_SIZE 1024
-const char *filename="uds-tmp";
+
+/*socket tcp客户端*/
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define SERVER_PORT 12345
 
 int main()
 {
-    struct sockaddr_un un;
-    int sock_fd;
-    char buffer[BUFFER_SIZE] = {1,2,3,4,6};
-    un.sun_family = AF_UNIX;
-    strcpy(un.sun_path,filename);
-    sock_fd = socket(AF_UNIX,SOCK_STREAM,0);
-    if(sock_fd < 0){
-        printf("Request socket failed\n");
-        return -1;
-    }
-    if(connect(sock_fd,(struct sockaddr *)&un,sizeof(un)) < 0){
-        printf("connect socket failed\n");
-        return -1;
-    }
-    send(sock_fd,buffer,BUFFER_SIZE,0);
+	int clientSocket;
+	struct sockaddr_in serverAddr;
+	char sendbuf[200];
+	char recvbuf[200];
+	int iDataNum;
+	if((clientSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	{
+		perror("socket");
+		return 1;
+	}
 
-    close(sock_fd);
-    return 0;
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_port = htons(SERVER_PORT);
+	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	if(connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
+	{
+		perror("connect");
+		return 1;
+	}
+
+	printf("connect with destination host...\n");
+
+	//while(1)
+	{
+		printf("Input your world:>");
+		scanf("%s", sendbuf);
+		printf("\n");
+
+		send(clientSocket, sendbuf, strlen(sendbuf), 0);
+		//if(strcmp(sendbuf, "quit") == 0)
+		//	break;
+		iDataNum = recv(clientSocket, recvbuf, 200, 0);
+		recvbuf[iDataNum] = '\0';
+		printf("recv data of my world is: %s\n", recvbuf);
+	}
+	//close(clientSocket);
+	return 0;
 }
