@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define SERVER_PORT 5555
+#define SERVER_PORT 12345
 
 int main()
 {

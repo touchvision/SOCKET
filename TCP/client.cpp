@@ -40,19 +40,19 @@ int main()
 
 	printf("connect with destination host...\n");
 
-	//while(1)
+	while(1)
 	{
 		printf("Input your world:>");
 		scanf("%s", sendbuf);
 		printf("\n");
 
 		send(clientSocket, sendbuf, strlen(sendbuf), 0);
-		//if(strcmp(sendbuf, "quit") == 0)
-		//	break;
+		if(strcmp(sendbuf, "quit") == 0)
+			break;
 		iDataNum = recv(clientSocket, recvbuf, 200, 0);
 		recvbuf[iDataNum] = '\0';
 		printf("recv data of my world is: %s\n", recvbuf);
 	}
-	//close(clientSocket);
+	close(clientSocket);
 	return 0;
 }
